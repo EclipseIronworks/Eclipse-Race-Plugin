@@ -1,41 +1,40 @@
 package io.github.eclipseironworks.mc.eclipseraces;
 
-        import com.google.common.reflect.TypeToken;
-        import com.google.inject.Inject;
-        import io.github.eclipseironworks.mc.eclipseraces.commands.ChooseRaceCommand;
-        import io.github.eclipseironworks.mc.eclipseraces.commands.NewRaceCommand;
-        import io.github.eclipseironworks.mc.eclipseraces.commands.element.EffectChoiceElement;
-        import io.github.eclipseironworks.mc.eclipseraces.commands.element.RaceChoiceElement;
-        import io.github.eclipseironworks.mc.eclipseraces.util.CharacterSerializer;
-        import io.github.eclipseironworks.mc.eclipseraces.util.RaceSerializer;
-        import ninja.leaping.configurate.ConfigurationNode;
-        import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-        import ninja.leaping.configurate.loader.ConfigurationLoader;
-        import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-        import org.spongepowered.api.Game;
-        import org.spongepowered.api.Sponge;
-        import org.spongepowered.api.command.args.CommandElement;
-        import org.spongepowered.api.command.args.GenericArguments;
-        import org.spongepowered.api.command.spec.CommandSpec;
-        import org.spongepowered.api.config.ConfigDir;
-        import org.spongepowered.api.config.DefaultConfig;
-        import org.spongepowered.api.entity.living.player.Player;
-        import org.spongepowered.api.event.Listener;
-        import org.spongepowered.api.event.filter.cause.First;
-        import org.spongepowered.api.event.game.state.GameInitializationEvent;
-        import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-        import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-        import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
-        import org.spongepowered.api.event.network.ClientConnectionEvent;
-        import org.spongepowered.api.plugin.Plugin;
-        import org.spongepowered.api.plugin.PluginContainer;
-        import org.slf4j.Logger;
-        import org.spongepowered.api.service.user.UserStorageService;
-        import org.spongepowered.api.text.Text;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
+import io.github.eclipseironworks.mc.eclipseraces.commands.ChooseRaceCommand;
+import io.github.eclipseironworks.mc.eclipseraces.commands.NewRaceCommand;
+import io.github.eclipseironworks.mc.eclipseraces.commands.element.EffectChoiceElement;
+import io.github.eclipseironworks.mc.eclipseraces.commands.element.RaceChoiceElement;
+import io.github.eclipseironworks.mc.eclipseraces.util.CharacterSerializer;
+import io.github.eclipseironworks.mc.eclipseraces.util.RaceSerializer;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import org.slf4j.Logger;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.Text;
 
-        import java.io.File;
-        import java.io.IOException;
-        import java.nio.file.Path;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 
 @Plugin(id = "eclipseecon", name = "EclipseRaces", version = "0.0.1", description = "Eclipse Ironwork's own racial plugin")
 public class EclipseRaces
@@ -78,6 +77,7 @@ public class EclipseRaces
 
     }
     @Listener
+    //When the game itself starts to start, this calls to build the commands
     public void init(GameInitializationEvent event)
     {
         buildCommands();
@@ -85,17 +85,20 @@ public class EclipseRaces
 
 
     @Listener
+    //When the game is finally started and loaded, it gets the UserService and starts loading in the races from the config
     public void onServerStart(GameStartedServerEvent event) {
         userStorageService = game.getServiceManager().provideUnchecked(UserStorageService.class);
         logger.info("User Storage Service loaded!");
         raceManager.loadOrCreateConfig();
     }
     @Listener
+    //When a player joins, it checks if they have a character or creates on.
     public void onPlayerJoin(ClientConnectionEvent.Join event, @First Player p)
     {
         raceManager.getOrCreateCharacter(p);
     }
     @Listener
+    //This saves the config files when the server stops
     public void onServerStopping(GameStoppingServerEvent event)
     {
         try
@@ -107,12 +110,7 @@ public class EclipseRaces
             e.printStackTrace();
         }
     }
-
-    private void getOrMakeConfig()
-    {
-
-    }
-
+        //this builds the commands
     public void buildCommands()
     {
 

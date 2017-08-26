@@ -1,7 +1,9 @@
 package io.github.eclipseironworks.mc.eclipseraces;
 
 import com.google.common.reflect.TypeToken;
-import io.github.eclipseironworks.mc.eclipseraces.Properties.Effects.*;
+import io.github.eclipseironworks.mc.eclipseraces.Properties.Effects.IRacialEffect;
+import io.github.eclipseironworks.mc.eclipseraces.Properties.Effects.RacialEffectActions;
+import io.github.eclipseironworks.mc.eclipseraces.Properties.Effects.RacialEffectFactory;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -30,6 +32,9 @@ public class RaceManager
     private HashMap<UUID, ECharacter> characterMap = new HashMap<>();
     private HashMap<String, IRacialEffect> effectMap = new HashMap<>();
 
+    /**
+    * This is the constructor, it requires the main class to be passed to it in order to get most of the functionality.
+    * */
     public RaceManager(EclipseRaces erp)
     {
          this.plugin = erp;
@@ -37,6 +42,10 @@ public class RaceManager
          this.loader = erp.getConfigManager();
 
     }
+
+    /**
+     * This will check if the config files exist, then load them.  If the files don't exist, it will create them for you.
+     */
     public void loadOrCreateConfig()
     {
             raceFile = new File(String.valueOf(plugin.getConfigDir()), "races.conf");
@@ -72,7 +81,9 @@ public class RaceManager
             }
     }
 
-
+    /**
+     * This builds the default race config file
+     */
     public void buildDefaultRaceCfg()
     {
         IRacialEffect defaultEffect = RacialEffectFactory.builder().key("Mundane").action(RacialEffectActions.NONE).build();
@@ -81,30 +92,34 @@ public class RaceManager
         Race dRace = Race.builder().name(
             Text.of("Human"))
             .effect(defaultEffect)
-            .build();
-        raceMap.put(dRace.getRaceName().toPlain().toLowerCase(), dRace);
-        effectMap.put(defaultEffect.getKey().toLowerCase(),defaultEffect);
+            .build();  //This creates a default race that has no special effects at all.  Useful for some reason, I don't know, I have a NONE race implemented as the default for players anyways
+        raceMap.put(dRace.getRaceName().toPlain().toLowerCase(), dRace); //This adds the race to the raceMap
+        effectMap.put(defaultEffect.getKey().toLowerCase(),defaultEffect); //This adds the Mundane effect to the effectMap
         try
         {
-            raceCfg.getNode("Races", "Human").setValue(TypeToken.of(Race.class), dRace);
+            raceCfg.getNode("Races", "Human").setValue(TypeToken.of(Race.class), dRace);  //Attempts to add the new race into the raceCfg
         } catch (ObjectMappingException e)
         {
             logger.info(e.getMessage());
         }
     }
+
+    /**
+     * This loads the races from the race file into raceMap
+     */
     public void loadRaces()
     {
-        Map<Object, ? extends ConfigurationNode> raceNodes = raceCfg.getNode("Races").getChildrenMap();
-        for(Map.Entry<Object, ? extends ConfigurationNode> entry : raceNodes.entrySet())
+        Map<Object, ? extends ConfigurationNode> raceNodes = raceCfg.getNode("Races").getChildrenMap();  //This loads all the the nodes in the race config to generate races with
+        for(Map.Entry<Object, ? extends ConfigurationNode> entry : raceNodes.entrySet())  //Interates over the new map
         {
             logger.info("Loading a race...");
-            if(entry.getKey() instanceof String)
+            if(entry.getKey() instanceof String)  //Checks if it did things right
             {
                 ConfigurationNode node = entry.getValue();
                 try
                 {
-                    Race newRace = node.getValue(TypeToken.of(Race.class));
-                    raceMap.put(newRace.getRaceName().toString().toLowerCase(),newRace);
+                    Race newRace = node.getValue(TypeToken.of(Race.class));  //loads the race from the cfg
+                    raceMap.put(newRace.getRaceName().toString().toLowerCase(),newRace); //adds the race to the raceMap
 
                 } catch (ObjectMappingException e)
                 {
@@ -136,6 +151,12 @@ public class RaceManager
         }
     }
 
+
+    /**
+     *  This method creates a new character for the player, and asks that they set their race.
+     * @param p the player that has just joined the server
+     * @return the ECharacter that is created
+     */
     public ECharacter newPlayer(Player p)
     {
         p.sendMessage(Text.of("Hello, " + p.getName() + "!  Welcome to Eclipse, please choose a race by doing /chooserace."));
@@ -146,6 +167,11 @@ public class RaceManager
         return newCharacter;
     }
 
+    /**
+     * This checks whether or not the given Player p has a character already, and makes one if they don't
+     * @param p target player
+     * @return Either returns the relevant player's character or returns the newly created one.
+     */
     public ECharacter getOrCreateCharacter(Player p)
     {
 
@@ -158,16 +184,20 @@ public class RaceManager
         return characterMap.put(uuid, newC);
     }
 
-    public Race getRace(String i)
-    {
-        return this.raceMap.get(i);
-    }
+    /* Returns the race found by the given key in raceMap */
 
+    public Optional<Race> getRace(String i)
+    {
+        return Optional.ofNullable(this.raceMap.get(i));
+    }
+    /* Adds a race to the raceMap */
     public void addRace(Race r)
     {
         raceMap.put(r.getRaceName().toPlain(), r);
     }
 
+
+    /* Adds an effect to the effect map */
     public void addEffect(IRacialEffect e)
     {
         effectMap.put(e.getKey(),e);
@@ -178,7 +208,7 @@ public class RaceManager
         return new ArrayList<>(effectMap.keySet());
     }
 
-    public boolean hasRace(String s)
+    public boolean raceExists(String s)
     {
         return raceMap.containsKey(s);
     }

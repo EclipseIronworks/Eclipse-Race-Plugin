@@ -8,7 +8,10 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public interface ECharacter
 {
@@ -19,7 +22,6 @@ public interface ECharacter
     void setRace(Race race, Cause cause);
     void apply(IRacialEffect e);
     void remove(IRacialEffect e);
-    int getRaceID();
     boolean hasChosenCharacter();
     default boolean isReal()
     {
@@ -34,7 +36,6 @@ public interface ECharacter
             //protected ICharacterHealth health;
             protected Player player;
             protected Race race;
-            protected int raceID;
             private Set<IRacialEffect> activeEffects = new HashSet<>();
             private boolean raceSetAtStart = false;
 
@@ -43,7 +44,6 @@ public interface ECharacter
             protected DefaultCharacter(Builder builder)
             {
                 this.player = builder.player;
-                this.raceID = builder.raceID;
                 this.uuid = builder.uuid;
             }
 
@@ -74,10 +74,6 @@ public interface ECharacter
             {
                 return race;
             }
-            public int getRaceID()
-            {
-                return this.raceID;
-            }
 
             @Override
             public boolean hasChosenCharacter()
@@ -97,7 +93,6 @@ public interface ECharacter
                 }
                 Sponge.getEventManager().post(new RaceChangeEvent(this.player, this.race, newRace, cause));
                 this.race = newRace;
-                this.raceID = newRace.getRacialID();
 
             }
 
@@ -190,11 +185,6 @@ public interface ECharacter
         public Builder race(Race race)
         {
             this.race = race;
-            return this;
-        }
-        public Builder raceID(int i)
-        {
-            this.raceID = i;
             return this;
         }
         public ECharacter build()
