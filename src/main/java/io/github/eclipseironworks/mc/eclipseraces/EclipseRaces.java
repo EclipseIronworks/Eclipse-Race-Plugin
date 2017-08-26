@@ -110,26 +110,17 @@ public class EclipseRaces
 
     private void getOrMakeConfig()
     {
-        try
-        {
-            if (!defaultConfig.exists())
-            {
 
-                logger.info("Config successfully created!");
-            } else
-            {
-                this.cfg = getConfigManager().load();
-            }
-        }
-        catch(IOException e)
-        {
-            logger.warn("[EE] Main Config failed to load or be created, printing stack trace...\n");
-            e.printStackTrace();
-        }
     }
 
     public void buildCommands()
     {
+
+        /*
+        *
+        *
+        * TODO Add more commands, like one that makes a new effect, one that adds and one that removes effects from races
+         */
         logger.info("Loading commands");
         CommandSpec chooseRace = CommandSpec.builder()
                 .description(Text.of("Choose your race command"))
@@ -157,7 +148,7 @@ public class EclipseRaces
                         new EffectChoiceElement(Text.of("effect"))
                 )
                 .build();
-        
+
 
 
 
